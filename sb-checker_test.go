@@ -4,14 +4,22 @@ import (
 	"testing"
 )
 
-func TestDecodeFile(t *testing.T) {
-
-	decodeFile("test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb")
-
-}
+const (
+	testCCBFilePath = "test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
+)
 
 func TestDecodeFileJSON(t *testing.T) {
+	if _, err := decodeFileJSON(testCCBFilePath); err != nil {
+		t.Error(err)
+	}
+}
 
-	decodeFileJSON("test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb")
-
+func TestReadCCBFile(t *testing.T) {
+	ccb, err := readCCBFile(testCCBFilePath)
+	if err != nil {
+		t.Error(err)
+	}
+	if ccb.NodeGraph.BaseClass != "CCNode" {
+		t.Error("baseClass is not CCNode > ", ccb.NodeGraph.BaseClass)
+	}
 }

@@ -1,33 +1,42 @@
+// package main
 package main
 
 import (
 	"os"
 
-	"fmt"
 	"log"
 
 	"encoding/json"
+
+	"fmt"
 
 	"github.com/codegangsta/cli"
 	"howett.net/plist"
 )
 
 type ccbRoot struct {
-	uuid      int       `json:UUID`
-	nodeGraph nodeGraph `json:"nodeGraph"`
+	UUID      int       `json:"UUID"`
+	NodeGraph nodeGraph `json:"nodeGraph"`
 }
 type nodeGraph struct {
-	uuid      int        `json:UUID`
-	childrens []children `json:"children"`
+	UUID      int        `json:"UUID"`
+	BaseClass string     `json:"baseClass"`
+	Childrens []children `json:"children"`
 }
 type children struct {
-	customeName string      `json:"customeName"`
-	properties  []propertie `json:"propertie"`
+	UUID                    int         `json:"UUID"`
+	BaseClass               string      `json:"baseClass"`
+	Childrens               []children  `json:"children"`
+	CustomClass             string      `json:"customClass"`
+	DisplayName             string      `json:"displayName"`
+	MemberVarAssignmentName string      `json:"memberVarAssignmentName"`
+	MemberVarAssignmentType int         `json:"memberVarAssignmentType"`
+	Properties              []propertie `json:"properties"`
 }
 type propertie struct {
-	name      string      `json:"name"`
-	value     interface{} `json:"value"`
-	childrens []children  `json:"children"`
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
+	Type  string      `json:"type"`
 }
 
 type decodeCcbRoot map[string]interface{}
@@ -46,64 +55,46 @@ func main() {
 	app.Run(os.Args)
 }
 
-// $ go run sb-checkeer.go version.go --input-ccb="/Users/kyokomi/src/github.com/kyokomi/sb-checkeer/test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
+// $ go run sb-checker.go version.go --input-ccb="/Users/kyokomi/src/github.com/kyokomi/sb-checkeer/test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 func doMain(c *cli.Context) {
 
-	decodeFile(c.String("input-ccb"))
-	//decodeFileJSON(c.String("input-ccb"))
-}
-
-func decodeFileJSON(filePath string) {
-	f, err := os.Open(filePath)
+	ccb, err := readCCBFile(c.String("input-ccb"))
 	if err != nil {
 		log.Fatal(err)
+	}
+	fmt.Println(ccb)
+}
+
+func readCCBFile(filePath string) (*ccbRoot, error) {
+	j, err := decodeFileJSON(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var ccb ccbRoot
+	if err := json.Unmarshal(j, &ccb); err != nil {
+		return nil, err
+	}
+	return &ccb, nil
+}
+
+// plistのファイルをjsonに変換する.
+func decodeFileJSON(filePath string) ([]byte, error) {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
 	}
 	defer f.Close()
 
 	d := plist.NewDecoder(f)
 	var m = make(decodeCcbRoot)
 	if err := d.Decode(m); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	j, err := json.Marshal(&m)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	fmt.Println(string(j))
-}
-
-func decodeFile(filePath string) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	d := plist.NewDecoder(f)
-	var m = make(map[string]interface{})
-	if err := d.Decode(m); err != nil {
-		log.Fatal(err)
-	}
-
-	var nodes = make(map[string]interface{})
-	nodes = m["nodeGraph"].(map[string]interface{})
-	readChildren(nodes["children"].([]interface{}))
-}
-
-func readChildren(children []interface{}) {
-	for _, child := range children {
-		child := child.(map[string]interface{})
-
-		fmt.Println("customeName:", child["customClass"])
-
-		for _, properties := range child["properties"].([]interface{}) {
-			p := properties.(map[string]interface{})
-			if p["name"].(string) == "name" {
-				fmt.Println("name:", p["value"])
-			}
-		}
-
-		readChildren(child["children"].([]interface{}))
-	}
+	return j, nil
 }
