@@ -1,7 +1,8 @@
 sb-checkeer
 
-[![Build Status](https://drone.io/github.com/kyokomi/sb-checker/status.png)](https://drone.io/github.com/kyokomi/sb-checker/latest)
-[![Coverage Status](https://coveralls.io/repos/kyokomi/sb-checker/badge.png)](https://coveralls.io/r/kyokomi/sb-checker)
+[![Build Status](https://drone.io/github.com/kyokomi/sb-checker/status.png)](https://drone.io/github.com/kyokomi/sb-checker/latest) 
+[![Coverage Status](https://img.shields.io/coveralls/kyokomi/sb-checker.svg)](https://coveralls.io/r/kyokomi/sb-checker?branch=master)
+
 
 Integrity check tool of SpriteBuilder for golang（Go）
 
