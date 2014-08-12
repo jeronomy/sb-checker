@@ -65,10 +65,11 @@ func doMain(c *cli.Context) {
 	fmt.Println(ccb)
 }
 
+// ccbファイルを読み込む。
 func readCCBFile(filePath string) (*ccbRoot, error) {
 	j, err := decodeFileJSON(filePath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	var ccb ccbRoot
