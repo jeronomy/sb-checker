@@ -49,8 +49,8 @@ func main() {
 // $ go run sb-checkeer.go version.go --input-ccb="/Users/kyokomi/src/github.com/kyokomi/sb-checkeer/test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 func doMain(c *cli.Context) {
 
-	//	decodeFile(c.String("input-ccb"))
-	decodeFileJSON(c.String("input-ccb"))
+	decodeFile(c.String("input-ccb"))
+	//decodeFileJSON(c.String("input-ccb"))
 }
 
 func decodeFileJSON(filePath string) {
