@@ -3,6 +3,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"log"
 
@@ -55,6 +56,10 @@ func main() {
 	app.Run(os.Args)
 }
 
+const (
+	childCounterChar = "->"
+)
+
 // $ go run sb-checker.go version.go --input-ccb="/Users/kyokomi/src/github.com/kyokomi/sb-checkeer/test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 func doMain(c *cli.Context) {
 
@@ -63,6 +68,20 @@ func doMain(c *cli.Context) {
 		log.Fatal(err)
 	}
 	fmt.Println(ccb)
+	fmt.Println("BaseClass = ", ccb.NodeGraph.BaseClass)
+	checkChildrens(0, ccb.NodeGraph.Childrens)
+}
+
+func checkChildrens(count int, childrens []children) {
+	for _, child := range childrens {
+		fmt.Println(strings.Repeat(childCounterChar, count), "customClass = ", child.CustomClass)
+		for _, prop := range child.Properties {
+			if prop.Name == "name" {
+				fmt.Println(strings.Repeat(childCounterChar, count), "name = ", prop.Value.(string))
+			}
+		}
+		checkChildrens(count+1, child.Childrens)
+	}
 }
 
 // ccbファイルを読み込む。
