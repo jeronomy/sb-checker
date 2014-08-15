@@ -2,14 +2,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"os"
 	"strings"
-
-	"log"
-
-	"encoding/json"
-
-	"fmt"
 
 	"github.com/codegangsta/cli"
 	"howett.net/plist"
@@ -19,11 +16,13 @@ type ccbRoot struct {
 	UUID      int       `json:"UUID"`
 	NodeGraph nodeGraph `json:"nodeGraph"`
 }
+
 type nodeGraph struct {
 	UUID      int        `json:"UUID"`
 	BaseClass string     `json:"baseClass"`
 	Childrens []children `json:"children"`
 }
+
 type children struct {
 	UUID                    int         `json:"UUID"`
 	BaseClass               string      `json:"baseClass"`

@@ -4,7 +4,7 @@ sb-checkeer
 [![Coverage Status](https://img.shields.io/coveralls/kyokomi/sb-checker.svg)](https://coveralls.io/r/kyokomi/sb-checker?branch=master)
 
 
-Integrity check tool of SpriteBuilder for golang（Go）
+Integrity check tool of [SpriteBuilder](http://www.spritebuilder.com/) for golang（Go）
 
 ====
 
