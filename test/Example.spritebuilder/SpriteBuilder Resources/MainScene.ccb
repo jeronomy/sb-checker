@@ -53,7 +53,7 @@
 				<key>displayName</key>
 				<string>CCNodeGradient</string>
 				<key>memberVarAssignmentName</key>
-				<string></string>
+				<string>fugaNode</string>
 				<key>memberVarAssignmentType</key>
 				<integer>1</integer>
 				<key>properties</key>

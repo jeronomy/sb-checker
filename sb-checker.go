@@ -10,6 +10,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"howett.net/plist"
+	"io/ioutil"
 )
 
 type ccbRoot struct {
@@ -41,6 +42,8 @@ type propertie struct {
 
 type decodeCcbRoot map[string]interface{}
 
+var notCustomNode = false
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "sb-checkeer"
@@ -49,7 +52,9 @@ func main() {
 	app.Author = "kyokomi"
 	app.Email = "kyoko1220adword@gmail.com"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{"input-ccb", "", "input spritebuilder ccb file path", "INPUT_CCB_FILE_PATH"},
+		cli.StringFlag{"input-ccb",     "", "input spritebuilder ccb file path", "INPUT_CCB_FILE_PATH"},
+		cli.StringFlag{"input-ccb-dir", "", "input spritebuilder ccb directry path", "INPUT_CCB_DIR_PATH"},
+		cli.BoolFlag{"d", "", ""},
 	}
 	app.Action = doMain
 	app.Run(os.Args)
@@ -62,22 +67,52 @@ const (
 // $ go run sb-checker.go version.go --input-ccb="/Users/kyokomi/src/github.com/kyokomi/sb-checkeer/test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 func doMain(c *cli.Context) {
 
-	ccb, err := readCCBFile(c.String("input-ccb"))
-	if err != nil {
-		log.Fatal(err)
+	notCustomNode = c.Bool("d")
+
+	if c.String("input-ccb-dir") == "" {
+		ccb, err := readCCBFile(c.String("input-ccb"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("BaseClass = ", ccb.NodeGraph.BaseClass)
+		checkChildrens(0, ccb.NodeGraph.Childrens)
+	} else {
+
+		err := checkReadCCBDir(c.String("input-ccb-dir"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	fmt.Println(ccb)
-	fmt.Println("BaseClass = ", ccb.NodeGraph.BaseClass)
-	checkChildrens(0, ccb.NodeGraph.Childrens)
+}
+
+func checkReadCCBDir(dirPath string) error {
+	fs, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return err
+	}
+	for _, file := range fs {
+		if file.IsDir() {
+			err := checkReadCCBDir(strings.Join([]string{dirPath, file.Name()} , "/"))
+			if err != nil {
+				return err
+			}
+		} else if strings.HasSuffix(file.Name(), ".ccb") {
+			ccb, err := readCCBFile(strings.Join([]string{dirPath, file.Name()} , "/"))
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("-%s\n", file.Name())
+			checkChildrens(0, ccb.NodeGraph.Childrens)
+		}
+	}
+	return nil
 }
 
 func checkChildrens(count int, childrens []children) {
 	for _, child := range childrens {
-		fmt.Println(strings.Repeat(childCounterChar, count), "customClass = ", child.CustomClass)
-		for _, prop := range child.Properties {
-			if prop.Name == "name" {
-				fmt.Println(strings.Repeat(childCounterChar, count), "name = ", prop.Value.(string))
-			}
+		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
+			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
+			fmt.Printf("| %-30s | %-40s | %-40s |\n", baseName, child.CustomClass, child.MemberVarAssignmentName)
 		}
 		checkChildrens(count+1, child.Childrens)
 	}
@@ -115,5 +150,6 @@ func decodeFileJSON(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return j, nil
 }

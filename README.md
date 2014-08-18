@@ -10,13 +10,39 @@ Integrity check tool of [SpriteBuilder](http://www.spritebuilder.com/) for golan
 
 ## Usage
 
-```console
-$ sb-checker --sb-project ./Untitled.spritebuilder --cpp-src ./Classes
+```sh
+$ sb-checker help
+NAME:
+   sb-checkeer -
+
+USAGE:
+   sb-checkeer [global options] command [command options] [arguments...]
+
+VERSION:
+   0.1.0
+
+AUTHOR:
+  kyokomi - <kyoko1220adword@gmail.com>
+
+COMMANDS:
+   help, h	Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --input-ccb 		input spritebuilder ccb file path [$INPUT_CCB_FILE_PATH]
+   --input-ccb-dir 	input spritebuilder ccb directry path [$INPUT_CCB_DIR_PATH]
+   -d
+   --help, -h		show help
+   --version, -v	print the version
 ```
 
 ## Demo
 
-comming soon...
+```sh
+$ sb-checker --input-ccb-dir test/Example.spritebuilder/SpriteBuilder\ Resources/
+-MainScene.ccb
+|  CCNodeGradient                | FugaNode                                 | fugaNode                                 |
+|  CCLabelTTF
+```
 
 ## Install
 
