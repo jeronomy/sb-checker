@@ -1,5 +1,6 @@
 sb-checkeer
 
+[![Build Status](https://drone.io/github.com/kyokomi/sb-checker/status.png)](https://drone.io/github.com/kyokomi/sb-checker/latest)
 [![Coverage Status](https://img.shields.io/coveralls/kyokomi/sb-checker.svg)](https://coveralls.io/r/kyokomi/sb-checker?branch=master)
 
 
