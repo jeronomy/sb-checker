@@ -18,7 +18,7 @@ func doMain(c *cli.Context) {
 			log.Fatal(err)
 		}
 	} else {
-		if err := CheckReadCCBDir(c.String("input-ccb")); err != nil {
+		if err := CheckReadCCBDir(c.String("input-ccb-dir")); err != nil {
 			log.Fatal(err)
 		}
 	}
