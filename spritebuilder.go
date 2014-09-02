@@ -73,6 +73,10 @@ func CheckReadCCBFile(filePath string) error {
 	}
 	index := strings.LastIndex(filePath, "/")
 	fmt.Printf("- %s\n", filePath[index+1:])
+	fmt.Println(strings.Repeat("-", 163))
+	fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", "BaseClassName", "DisplyName", "CustomeClass", "MemberName")
+	fmt.Println(strings.Repeat("-", 163))
+
 	checkChildren(0, ccb.NodeGraph.Children)
 
 	return nil
@@ -82,7 +86,7 @@ func checkChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
 			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
-			fmt.Printf("| %-30s | %-40s | %-40s |\n", baseName, child.CustomClass, child.MemberVarAssignmentName)
+			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, child.CustomClass, child.MemberVarAssignmentName)
 		}
 		checkChildren(count+1, child.Children)
 	}
