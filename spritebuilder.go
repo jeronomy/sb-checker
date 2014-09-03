@@ -21,15 +21,16 @@ const (
 	ASSIGN_CCB_MEMBER_TEMPLATE = "SB_MEMBERVARIABLEASSIGNER_GLUE(this, \"%s\", %s*, this->_%s);\n"
 )
 
-var CCBConvertClassMapping = map[string]string {
+var CCBConvertClassMapping = map[string]string{
 	"CCSprite9Slice": "cocos2d::extension::Scale9Sprite",
-	"CCSprite": "cocos2d::Sprite",
-	"CCLabelTTF": "cocos2d::Label",
+	"CCSprite":       "cocos2d::Sprite",
+	"CCLabelTTF":     "cocos2d::Label",
 }
 
 type ccbRoot struct {
 	UUID      int       `json:"UUID"`
 	NodeGraph nodeGraph `json:"nodeGraph"`
+	Sequences []sequences `json:"sequences"`
 }
 
 type nodeGraph struct {
@@ -57,6 +58,27 @@ type properties struct {
 	Name  string      `json:"name"`
 	Value interface{} `json:"value"`
 	Type  string      `json:"type"`
+}
+
+type sequences struct {
+	AutoPlay          bool `json:"autoPlay"`
+	CallbackChannel struct {
+		Keyframes []interface{} `json:"keyframes"`
+		Type      float64       `json:"type"`
+	} `json:"callbackChannel"`
+	ChainedSequenceId float64 `json:"chainedSequenceId"`
+	Length            float64 `json:"length"`
+	Name              string  `json:"name"`
+	Offset            float64 `json:"offset"`
+	Position          float64 `json:"position"`
+	Resolution        float64 `json:"resolution"`
+	Scale             float64 `json:"scale"`
+	SequenceId        float64 `json:"sequenceId"`
+	SoundChannel      struct {
+		IsExpanded bool          `json:"isExpanded"`
+		Keyframes  []interface{} `json:"keyframes"`
+		Type       float64       `json:"type"`
+	} `json:"soundChannel"`
 }
 
 type decodeCcbRoot map[string]interface{}
@@ -157,6 +179,18 @@ func CheckReadCCBFile(filePath string) error {
 
 	checkChildren(0, ccb.NodeGraph.Children)
 
+	// timeline
+	fmt.Println(strings.Repeat("-", 163))
+	fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "TimelineName", "AutoPlay", "", "")
+	fmt.Println(strings.Repeat("-", 163))
+	for _, seq := range ccb.Sequences {
+		autoPlay := ""
+		if seq.AutoPlay {
+			autoPlay = "ON"
+		}
+		fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", seq.Name,  autoPlay, "", "")
+	}
+
 	if err := CreateCppCodeToCCBFile(filePath); err != nil {
 		return err
 	}
@@ -180,6 +214,8 @@ func readCCBFile(filePath string) (*ccbRoot, error) {
 	if err != nil {
 		return nil, err
 	}
+
+//	fmt.Println(string(j))
 
 	var ccb ccbRoot
 	if err := json.Unmarshal(j, &ccb); err != nil {
