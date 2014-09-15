@@ -25,6 +25,9 @@ var CCBConvertClassMapping = map[string]string{
 	"CCSprite9Slice": "cocos2d::extension::Scale9Sprite",
 	"CCSprite":       "cocos2d::Sprite",
 	"CCLabelTTF":     "cocos2d::Label",
+	"CCButton":       "cocos2d::extension::ControlButton",
+	"CCBFile":        "cocos2d::Node",
+	"CCNode":         "cocos2d::Node",
 }
 
 type ccbRoot struct {
@@ -45,6 +48,10 @@ type children struct {
 }
 
 func (c *children) Cocos2dxClassName() string {
+	customClass := c.getCCBCustomClass()
+	if customClass != "" {
+		return customClass
+	}
 	return CCBConvertClassMapping[c.BaseClass]
 }
 
