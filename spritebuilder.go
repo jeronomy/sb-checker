@@ -54,6 +54,35 @@ type properties struct {
 	Type  string      `json:"type"`
 }
 
+func (c *children) getCCBFileName() string {
+	for _, properties := range c.Properties {
+		if properties.Type != "CCBFile" {
+			continue
+		}
+		return properties.Value.(string)
+	}
+	return ""
+}
+
+func (c *children) getCCBCustomClass() string {
+	if c.CustomClass != "" {
+		return c.CustomClass
+	}
+
+	filePath := c.getCCBFileName()
+	if filePath == "" {
+		return ""
+	}
+
+	// TODO: ccbRootDirectory currentDir
+	ccb, err := readCCBFile(filePath)
+	if err != nil {
+		return ""
+	}
+
+	return ccb.NodeGraph.CustomClass
+}
+
 type sequences struct {
 	AutoPlay          bool `json:"autoPlay"`
 	CallbackChannel struct {
@@ -195,8 +224,9 @@ func CheckReadCCBFile(filePath string) error {
 func checkChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
+			customClass := child.getCCBCustomClass()
 			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
-			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, child.CustomClass, child.MemberVarAssignmentName)
+			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, customClass, child.MemberVarAssignmentName)
 		}
 		checkChildren(count+1, child.Children)
 	}
@@ -208,8 +238,6 @@ func readCCBFile(filePath string) (*ccbRoot, error) {
 	if err != nil {
 		return nil, err
 	}
-
-//	fmt.Println(string(j))
 
 	var ccb ccbRoot
 	if err := json.Unmarshal(j, &ccb); err != nil {
