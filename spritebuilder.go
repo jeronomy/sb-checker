@@ -29,14 +29,8 @@ var CCBConvertClassMapping = map[string]string{
 
 type ccbRoot struct {
 	UUID      int       `json:"UUID"`
-	NodeGraph nodeGraph `json:"nodeGraph"`
+	NodeGraph children  `json:"nodeGraph"`
 	Sequences []sequences `json:"sequences"`
-}
-
-type nodeGraph struct {
-	UUID      int        `json:"UUID"`
-	BaseClass string     `json:"baseClass"`
-	Children  []children `json:"children"`
 }
 
 type children struct {
