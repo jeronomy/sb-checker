@@ -31,8 +31,8 @@ var CCBConvertClassMapping = map[string]string{
 }
 
 type ccbRoot struct {
-	UUID      int       `json:"UUID"`
-	NodeGraph children  `json:"nodeGraph"`
+	UUID      int         `json:"UUID"`
+	NodeGraph children    `json:"nodeGraph"`
 	Sequences []sequences `json:"sequences"`
 }
 
@@ -91,7 +91,7 @@ func (c *children) getCCBCustomClass() string {
 }
 
 type sequences struct {
-	AutoPlay          bool `json:"autoPlay"`
+	AutoPlay        bool `json:"autoPlay"`
 	CallbackChannel struct {
 		Keyframes []interface{} `json:"keyframes"`
 		Type      float64       `json:"type"`
@@ -137,6 +137,49 @@ func CheckReadCCBDir(dirPath string) error {
 		}
 	}
 	return nil
+}
+
+func CheckReadCCBFile(filePath string) error {
+	ccb, err := readCCBFile(filePath)
+	if err != nil {
+		return err
+	}
+	index := strings.LastIndex(filePath, "/")
+	fmt.Printf("- %s\n", filePath[index+1:])
+	fmt.Println(strings.Repeat("-", 163))
+	fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", "BaseClassName", "DisplyName", "CustomeClass", "MemberName")
+	fmt.Println(strings.Repeat("-", 163))
+
+	checkChildren(0, ccb.NodeGraph.Children)
+
+	// timeline
+	fmt.Println(strings.Repeat("-", 163))
+	fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "TimelineName", "AutoPlay", "", "")
+	fmt.Println(strings.Repeat("-", 163))
+	for _, seq := range ccb.Sequences {
+		autoPlay := ""
+		if seq.AutoPlay {
+			autoPlay = "ON"
+		}
+		fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", seq.Name, autoPlay, "", "")
+	}
+
+	if err := CreateCppCodeToCCBFile(filePath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func checkChildren(count int, c []children) {
+	for _, child := range c {
+		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
+			customClass := child.getCCBCustomClass()
+			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
+			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, customClass, child.MemberVarAssignmentName)
+		}
+		checkChildren(count+1, child.Children)
+	}
 }
 
 func CreateCppCodeToCCBFile(filePath string) error {
@@ -193,49 +236,6 @@ func createCppAssignCCBMemberCodeChildren(count int, c []children) {
 			fmt.Printf(ASSIGN_CCB_MEMBER_TEMPLATE, child.MemberVarAssignmentName, child.Cocos2dxClassName(), child.MemberVarAssignmentName)
 		}
 		createCppAssignCCBMemberCodeChildren(count+1, child.Children)
-	}
-}
-
-func CheckReadCCBFile(filePath string) error {
-	ccb, err := readCCBFile(filePath)
-	if err != nil {
-		return err
-	}
-	index := strings.LastIndex(filePath, "/")
-	fmt.Printf("- %s\n", filePath[index+1:])
-	fmt.Println(strings.Repeat("-", 163))
-	fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", "BaseClassName", "DisplyName", "CustomeClass", "MemberName")
-	fmt.Println(strings.Repeat("-", 163))
-
-	checkChildren(0, ccb.NodeGraph.Children)
-
-	// timeline
-	fmt.Println(strings.Repeat("-", 163))
-	fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "TimelineName", "AutoPlay", "", "")
-	fmt.Println(strings.Repeat("-", 163))
-	for _, seq := range ccb.Sequences {
-		autoPlay := ""
-		if seq.AutoPlay {
-			autoPlay = "ON"
-		}
-		fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", seq.Name,  autoPlay, "", "")
-	}
-
-	if err := CreateCppCodeToCCBFile(filePath); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func checkChildren(count int, c []children) {
-	for _, child := range c {
-		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			customClass := child.getCCBCustomClass()
-			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
-			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, customClass, child.MemberVarAssignmentName)
-		}
-		checkChildren(count+1, child.Children)
 	}
 }
 

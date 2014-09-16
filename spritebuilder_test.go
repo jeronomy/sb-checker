@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	testCCBDirPath = "test/Example.spritebuilder/SpriteBuilder Resources/"
+	testCCBDirPath  = "test/Example.spritebuilder/SpriteBuilder Resources/"
 	testCCBFilePath = "test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 )
 
