@@ -4,34 +4,15 @@ import (
 	"testing"
 )
 
-const (
-	testCCBDirPath  = "test/Example.spritebuilder/SpriteBuilder Resources/"
-	testCCBFilePath = "test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
-)
-
 func TestCheckReadCCBFile(t *testing.T) {
+	testCCBFilePath := "test/Example.spritebuilder/SpriteBuilder Resources/MainScene.ccb"
 	if err := CheckReadCCBFile(testCCBFilePath); err != nil {
 		t.Error(err)
 	}
 }
 func TestCheckReadCCBDir(t *testing.T) {
+	testCCBDirPath := "test/Example.spritebuilder/SpriteBuilder Resources/"
 	if err := CheckReadCCBDir(testCCBDirPath); err != nil {
 		t.Error(err)
-	}
-}
-
-func TestDecodeFileJSON(t *testing.T) {
-	if _, err := decodeFileJSON(testCCBFilePath); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestReadCCBFile(t *testing.T) {
-	ccb, err := readCCBFile(testCCBFilePath)
-	if err != nil {
-		t.Error(err)
-	}
-	if ccb.NodeGraph.BaseClass != "CCNode" {
-		t.Error("baseClass is not CCNode > ", ccb.NodeGraph.BaseClass)
 	}
 }

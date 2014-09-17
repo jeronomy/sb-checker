@@ -1,13 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
-
-	"howett.net/plist"
 )
 
 const (
@@ -28,87 +24,6 @@ var CCBConvertClassMapping = map[string]string{
 	"CCButton":       "cocos2d::extension::ControlButton",
 	"CCBFile":        "cocos2d::Node",
 	"CCNode":         "cocos2d::Node",
-}
-
-type ccbRoot struct {
-	UUID      int         `json:"UUID"`
-	NodeGraph children    `json:"nodeGraph"`
-	Sequences []sequences `json:"sequences"`
-}
-
-type children struct {
-	UUID                    int          `json:"UUID"`
-	BaseClass               string       `json:"baseClass"`
-	Children                []children   `json:"children"`
-	CustomClass             string       `json:"customClass"`
-	DisplayName             string       `json:"displayName"`
-	MemberVarAssignmentName string       `json:"memberVarAssignmentName"`
-	MemberVarAssignmentType int          `json:"memberVarAssignmentType"`
-	Properties              []properties `json:"properties"`
-}
-
-func (c *children) Cocos2dxClassName() string {
-	customClass := c.getCCBCustomClass()
-	if customClass != "" {
-		return customClass
-	}
-	return CCBConvertClassMapping[c.BaseClass]
-}
-
-type properties struct {
-	Name  string      `json:"name"`
-	Value interface{} `json:"value"`
-	Type  string      `json:"type"`
-}
-
-func (c *children) getCCBFileName() string {
-	for _, properties := range c.Properties {
-		if properties.Type != "CCBFile" {
-			continue
-		}
-		return properties.Value.(string)
-	}
-	return ""
-}
-
-func (c *children) getCCBCustomClass() string {
-	if c.CustomClass != "" {
-		return c.CustomClass
-	}
-
-	filePath := c.getCCBFileName()
-	if filePath == "" {
-		return ""
-	}
-
-	// TODO: ccbRootDirectory currentDir
-	ccb, err := readCCBFile(filePath)
-	if err != nil {
-		return ""
-	}
-
-	return ccb.NodeGraph.CustomClass
-}
-
-type sequences struct {
-	AutoPlay        bool `json:"autoPlay"`
-	CallbackChannel struct {
-		Keyframes []interface{} `json:"keyframes"`
-		Type      float64       `json:"type"`
-	} `json:"callbackChannel"`
-	ChainedSequenceId float64 `json:"chainedSequenceId"`
-	Length            float64 `json:"length"`
-	Name              string  `json:"name"`
-	Offset            float64 `json:"offset"`
-	Position          float64 `json:"position"`
-	Resolution        float64 `json:"resolution"`
-	Scale             float64 `json:"scale"`
-	SequenceId        float64 `json:"sequenceId"`
-	SoundChannel      struct {
-		IsExpanded bool          `json:"isExpanded"`
-		Keyframes  []interface{} `json:"keyframes"`
-		Type       float64       `json:"type"`
-	} `json:"soundChannel"`
 }
 
 type decodeCcbRoot map[string]interface{}
@@ -224,7 +139,7 @@ func createDestructorCppCodeChildren(count int, c []children) {
 func createCppMemberCodeChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			fmt.Printf(MEMBER_TEMPLATE, child.Cocos2dxClassName(), child.MemberVarAssignmentName)
+			fmt.Printf(MEMBER_TEMPLATE, child.getCocos2dxClassName(), child.MemberVarAssignmentName)
 		}
 		createCppMemberCodeChildren(count+1, child.Children)
 	}
@@ -233,44 +148,8 @@ func createCppMemberCodeChildren(count int, c []children) {
 func createCppAssignCCBMemberCodeChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			fmt.Printf(ASSIGN_CCB_MEMBER_TEMPLATE, child.MemberVarAssignmentName, child.Cocos2dxClassName(), child.MemberVarAssignmentName)
+			fmt.Printf(ASSIGN_CCB_MEMBER_TEMPLATE, child.MemberVarAssignmentName, child.getCocos2dxClassName(), child.MemberVarAssignmentName)
 		}
 		createCppAssignCCBMemberCodeChildren(count+1, child.Children)
 	}
-}
-
-// ccbファイルを読み込む。
-func readCCBFile(filePath string) (*ccbRoot, error) {
-	j, err := decodeFileJSON(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var ccb ccbRoot
-	if err := json.Unmarshal(j, &ccb); err != nil {
-		return nil, err
-	}
-	return &ccb, nil
-}
-
-// plistのファイルをjsonに変換する.
-func decodeFileJSON(filePath string) ([]byte, error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	d := plist.NewDecoder(f)
-	var m = make(decodeCcbRoot)
-	if err := d.Decode(m); err != nil {
-		return nil, err
-	}
-
-	j, err := json.Marshal(&m)
-	if err != nil {
-		return nil, err
-	}
-
-	return j, nil
 }
