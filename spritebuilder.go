@@ -69,7 +69,7 @@ func CheckReadCCBFile(filePath string) error {
 
 	// timeline
 	fmt.Println(strings.Repeat("-", 163))
-	fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "TimelineName", "AutoPlay", "", "")
+	fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "TimelineName", "AutoPlay", "CallbackFunc", "")
 	fmt.Println(strings.Repeat("-", 163))
 	for _, seq := range ccb.Sequences {
 		autoPlay := ""
@@ -77,6 +77,11 @@ func CheckReadCCBFile(filePath string) error {
 			autoPlay = "ON"
 		}
 		fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", seq.Name, autoPlay, "", "")
+
+		for _, keyframe := range seq.CallbackChannel.Keyframes {
+
+			fmt.Printf("| %-30s | %-10s | %-40s | %-70s |\n", "", "", keyframe.Value[0], "")
+		}
 	}
 
 	if err := CreateCppCodeToCCBFile(filePath); err != nil {

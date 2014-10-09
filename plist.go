@@ -32,7 +32,7 @@ type properties struct {
 type sequences struct {
 	AutoPlay        bool `json:"autoPlay"`
 	CallbackChannel struct {
-		Keyframes []interface{} `json:"keyframes"`
+		Keyframes []keyframe   `json:"keyframes"`
 		Type      float64       `json:"type"`
 	} `json:"callbackChannel"`
 	ChainedSequenceId float64 `json:"chainedSequenceId"`
@@ -45,9 +45,18 @@ type sequences struct {
 	SequenceId        float64 `json:"sequenceId"`
 	SoundChannel      struct {
 		IsExpanded bool          `json:"isExpanded"`
-		Keyframes  []interface{} `json:"keyframes"`
+		Keyframes  []keyframe   `json:"keyframes"`
 		Type       float64       `json:"type"`
 	} `json:"soundChannel"`
+}
+
+type keyframe struct {
+	Easing struct {
+		Type float64 `json:"type"`
+	} `json:"easing"`
+	Time  float64       `json:"time"`
+	Type  float64       `json:"type"`
+	Value []interface{} `json:"value"`
 }
 
 func (c *children) getCocos2dxClassName() string {
