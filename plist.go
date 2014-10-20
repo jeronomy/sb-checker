@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"howett.net/plist"
+	"strings"
 )
 
 type ccbRoot struct {
@@ -59,8 +60,8 @@ type keyframe struct {
 	Value []interface{} `json:"value"`
 }
 
-func (c *children) getCocos2dxClassName() string {
-	customClass := c.getCCBCustomClass()
+func (c *children) getCocos2dxClassName(baseDir string) string {
+	customClass := c.getCCBCustomClass(baseDir)
 	if customClass != "" {
 		return customClass
 	}
@@ -77,7 +78,7 @@ func (c *children) getCCBFileName() string {
 	return ""
 }
 
-func (c *children) getCCBCustomClass() string {
+func (c *children) getCCBCustomClass(baseDir string) string {
 	if c.CustomClass != "" {
 		return c.CustomClass
 	}
@@ -87,8 +88,8 @@ func (c *children) getCCBCustomClass() string {
 		return ""
 	}
 
-	// TODO: ccbRootDirectory currentDir
-	ccb, err := readCCBFile(filePath)
+	cPath := strings.Join([]string{baseDir, filePath}, "/")
+	ccb, err := readCCBFile(cPath)
 	if err != nil {
 		return ""
 	}

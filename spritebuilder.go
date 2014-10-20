@@ -33,6 +33,7 @@ var notCustomNode = false
 const (
 	childCounterChar = "->"
 )
+var ccbRootDirectory = ""
 
 func CheckReadCCBDir(dirPath string) error {
 	fs, err := ioutil.ReadDir(dirPath)
@@ -94,7 +95,7 @@ func CheckReadCCBFile(filePath string) error {
 func checkChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			customClass := child.getCCBCustomClass()
+			customClass := child.getCCBCustomClass(ccbRootDirectory)
 			baseName := strings.Join([]string{strings.Repeat(childCounterChar, count), child.BaseClass}, " ")
 			fmt.Printf("| %-30s | %-40s | %-40s | %-40s |\n", baseName, child.DisplayName, customClass, child.MemberVarAssignmentName)
 		}
@@ -144,7 +145,7 @@ func createDestructorCppCodeChildren(count int, c []children) {
 func createCppMemberCodeChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			fmt.Printf(MEMBER_TEMPLATE, child.getCocos2dxClassName(), child.MemberVarAssignmentName)
+			fmt.Printf(MEMBER_TEMPLATE, child.getCocos2dxClassName(ccbRootDirectory), child.MemberVarAssignmentName)
 		}
 		createCppMemberCodeChildren(count+1, child.Children)
 	}
@@ -153,7 +154,7 @@ func createCppMemberCodeChildren(count int, c []children) {
 func createCppAssignCCBMemberCodeChildren(count int, c []children) {
 	for _, child := range c {
 		if !notCustomNode || child.CustomClass != "" || child.MemberVarAssignmentName != "" {
-			fmt.Printf(ASSIGN_CCB_MEMBER_TEMPLATE, child.MemberVarAssignmentName, child.getCocos2dxClassName(), child.MemberVarAssignmentName)
+			fmt.Printf(ASSIGN_CCB_MEMBER_TEMPLATE, child.MemberVarAssignmentName, child.getCocos2dxClassName(ccbRootDirectory), child.MemberVarAssignmentName)
 		}
 		createCppAssignCCBMemberCodeChildren(count+1, child.Children)
 	}

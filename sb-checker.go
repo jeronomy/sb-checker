@@ -12,7 +12,9 @@ import (
 func doMain(c *cli.Context) {
 
 	notCustomNode = c.Bool("d")
+	ccbRootDirectory = c.String("ccb-home")
 
+	// ディレクトリ指定かファイル指定か
 	if c.String("input-ccb-dir") == "" {
 		if err := CheckReadCCBFile(c.String("input-ccb")); err != nil {
 			log.Fatal(err)
@@ -35,6 +37,7 @@ func main() {
 		cli.StringFlag{"input-ccb", "", "input spritebuilder ccb file path", "INPUT_CCB_FILE_PATH"},
 		cli.StringFlag{"input-ccb-dir", "", "input spritebuilder ccb directry path", "INPUT_CCB_DIR_PATH"},
 		cli.BoolFlag{"d", "", ""},
+		cli.StringFlag{"ccb-home", "", "", ""},
 	}
 	app.Action = doMain
 	app.Run(os.Args)
